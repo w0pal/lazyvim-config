@@ -1,0 +1,12 @@
+return {
+  'vyfor/cord.nvim',
+  event = "VeryLazy",
+  config = function()
+    require('cord').setup({
+      -- konfigurasi plugin di sini
+      token = "<your-token>",
+      client_id = "<your-client-id>",
+    })
+  end
+}
+  
