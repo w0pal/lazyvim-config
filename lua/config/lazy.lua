@@ -5,7 +5,7 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
   if vim.v.shell_error ~= 0 then
     vim.api.nvim_echo({
       { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
-      { out,                            "WarningMsg" },
+      { out, "WarningMsg" },
       { "\nPress any key to exit..." },
     }, true, {})
     vim.fn.getchar()
@@ -17,12 +17,77 @@ vim.opt.rtp:prepend(lazypath)
 require("lazy").setup({
   spec = {
     -- add LazyVim and import its plugins
-    { "LazyVim/LazyVim",                                import = "lazyvim.plugins" },
+    { "LazyVim/LazyVim", import = "lazyvim.plugins" },
     -- import any extras modules here
     { import = "lazyvim.plugins.extras.lang.typescript" },
     { import = "lazyvim.plugins.extras.lang.json" },
     { import = "lazyvim.plugins.extras.ui.mini-animate" },
     { import = "lazyvim.plugins.extras.lang.python" },
+    {
+      "ravitemer/mcphub.nvim",
+      dependencies = {
+        "nvim-lua/plenary.nvim",
+      },
+      build = "bundled_build.lua",
+      cmd = "MCPHub",
+      keys = {
+        { "<leader>aM", "<cmd>MCPHub<cr>", desc = "MCP Hub" },
+      },
+      config = function()
+        require("mcphub").setup({
+          use_bundled_binary = true,
+          auto_approve = false,
+          extensions = {
+            copilotchat = {
+              enabled = true,
+              convert_tools_to_functions = true,
+              convert_resources_to_functions = true,
+              add_mcp_prefix = false,
+            },
+          },
+          ui = {
+            window = {
+              border = "single",
+            },
+          },
+        })
+      end,
+    },
+    {
+      "ishiooon/codex.nvim",
+      dependencies = {
+        "folke/snacks.nvim",
+      },
+      enabled = function()
+        return vim.fn.executable("codex") == 1
+      end,
+      cmd = {
+        "Codex",
+        "CodexFocus",
+        "CodexSend",
+        "CodexTreeAdd",
+      },
+      keys = {
+        { "<leader>aC", "<cmd>Codex<cr>", desc = "Codex: Toggle" },
+        { "<leader>aF", "<cmd>CodexFocus<cr>", desc = "Codex: Focus" },
+        { "<leader>aS", "<cmd>CodexSend<cr>", mode = "v", desc = "Codex: Send selection" },
+        { "<leader>aA", "<cmd>CodexTreeAdd<cr>", desc = "Codex: Add file", ft = { "neo-tree", "oil" } },
+      },
+      config = function()
+        local notify_path = vim.fn.stdpath("state") .. "/codex.nvim/notify.jsonl"
+
+        require("codex").setup({
+          terminal_cmd = vim.fn.exepath("codex"),
+          env = {
+            ENABLE_IDE_INTEGRATION = "true",
+            CODEX_NVIM_NOTIFY_PATH = notify_path,
+          },
+          status_indicator = {
+            cli_notify_path = notify_path,
+          },
+        })
+      end,
+    },
     -- import/override with your plugins
     { import = "plugins" },
   },
@@ -39,7 +104,7 @@ require("lazy").setup({
   checker = {
     enabled = true, -- check for plugin updates periodically
     notify = false, -- notify on update
-  },                -- automatically check for plugin updates
+  }, -- automatically check for plugin updates
   performance = {
     rtp = {
       -- disable some rtp plugins
